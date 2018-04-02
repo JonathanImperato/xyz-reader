@@ -1,5 +1,7 @@
 package com.example.xyzreader.ui;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,17 +9,21 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.format.DateUtils;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -27,6 +33,10 @@ import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
 import com.example.xyzreader.data.UpdaterService;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,7 +48,7 @@ import java.util.GregorianCalendar;
  * touched, lead to a {@link ArticleDetailActivity} representing item details. On tablets, the
  * activity presents a grid of items as cards.
  */
-public class ArticleListActivity extends ActionBarActivity implements
+public class ArticleListActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = ArticleListActivity.class.toString();
@@ -50,14 +60,14 @@ public class ArticleListActivity extends ActionBarActivity implements
     // Use default locale format
     private SimpleDateFormat outputFormat = new SimpleDateFormat();
     // Most time functions can only handle 1902 - 2037
-    private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2,1,1);
+    private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2, 1, 1);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.detail_toolbar);
 
 
         final View toolbarContainerView = findViewById(R.id.toolbar_container);
@@ -67,7 +77,7 @@ public class ArticleListActivity extends ActionBarActivity implements
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         getLoaderManager().initLoader(0, null, this);
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && getLoaderManager().getLoader(0) == null) { //avoid a refresh call if i just started the loader
             refresh();
         }
     }
@@ -162,6 +172,62 @@ public class ArticleListActivity extends ActionBarActivity implements
                 Log.i(TAG, "passing today's date");
                 return new Date();
             }
+
+        }
+
+        public void createPaletteAsync(Bitmap bitmap, final CardView cardView, final TextView title, final TextView subtitle) {
+            Palette p = Palette.from(bitmap).generate();
+            // Use generated instance
+            Palette.Swatch vibrant = p.getVibrantSwatch();
+            Palette.Swatch lightVibrant = p.getLightVibrantSwatch();
+            Palette.Swatch darkVibrant = p.getDarkVibrantSwatch();
+            Palette.Swatch dominantSwatch = p.getDominantSwatch();
+            Palette.Swatch mutedSwatch = p.getMutedSwatch();
+            Palette.Swatch darkMutedSwatch = p.getDarkMutedSwatch();
+            if (vibrant != null) {
+                ObjectAnimator animation =  ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, vibrant.getRgb());
+                title.setTextColor(vibrant.getTitleTextColor());
+                subtitle.setTextColor(vibrant.getBodyTextColor());
+                animation.setEvaluator(new ArgbEvaluator());
+                animation.setDuration(1000);
+                animation.start();
+            } else if (lightVibrant != null) {
+                ObjectAnimator animation =  ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, lightVibrant.getRgb());
+                title.setTextColor(lightVibrant.getTitleTextColor());
+                subtitle.setTextColor(lightVibrant.getBodyTextColor());
+                animation.setEvaluator(new ArgbEvaluator());
+                animation.setDuration(1000);
+                animation.start();
+            } else if (darkVibrant != null) {
+                ObjectAnimator animation =  ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, darkVibrant.getRgb());
+                title.setTextColor(darkVibrant.getTitleTextColor());
+                subtitle.setTextColor(darkVibrant.getBodyTextColor());
+                animation.setEvaluator(new ArgbEvaluator());
+                animation.setDuration(1000);
+                animation.start();
+            } else if (dominantSwatch != null) {
+                ObjectAnimator animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, dominantSwatch.getRgb());
+                title.setTextColor(dominantSwatch.getTitleTextColor());
+                subtitle.setTextColor(dominantSwatch.getBodyTextColor());
+                animation.setEvaluator(new ArgbEvaluator());
+                animation.setDuration(1000);
+                animation.start();
+            } else if (mutedSwatch != null) {
+                ObjectAnimator animation =ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, mutedSwatch.getRgb());
+                title.setTextColor(mutedSwatch.getTitleTextColor());
+                subtitle.setTextColor(mutedSwatch.getBodyTextColor());
+                animation.setEvaluator(new ArgbEvaluator());
+                animation.setDuration(1000);
+                animation.start();
+            } else if (darkMutedSwatch != null) {
+                ObjectAnimator animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, darkMutedSwatch.getRgb());
+                title.setTextColor(darkMutedSwatch.getTitleTextColor());
+                animation.setEvaluator(new ArgbEvaluator());
+                subtitle.setTextColor(darkMutedSwatch.getBodyTextColor());
+                animation.setDuration(1000);
+                animation.start();
+            }
+
         }
 
         @Override
@@ -181,14 +247,61 @@ public class ArticleListActivity extends ActionBarActivity implements
             } else {
                 holder.subtitleView.setText(Html.fromHtml(
                         outputFormat.format(publishedDate)
-                        + "<br/>" + " by "
-                        + mCursor.getString(ArticleLoader.Query.AUTHOR)));
+                                + "<br/>" + " by "
+                                + mCursor.getString(ArticleLoader.Query.AUTHOR)));
             }
-            holder.thumbnailView.setImageUrl(
-                    mCursor.getString(ArticleLoader.Query.THUMB_URL),
+
+            String url = mCursor.getString(ArticleLoader.Query.THUMB_URL);
+            LoadCard loadCard = new LoadCard(url, holder.cardView, holder.titleView, holder.subtitleView);
+            loadCard.execute();
+            holder.thumbnailView.setImageUrl(url,
                     ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
             holder.thumbnailView.setAspectRatio(mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO));
+
         }
+
+        public class LoadCard extends AsyncTask<String, Void, Bitmap> {
+            private String mUrl;
+            private CardView cardView;
+            private TextView title, subtitle;
+
+            public LoadCard(String mUrl, CardView cardView, TextView title, TextView subtitle) {
+                this.mUrl = mUrl;
+                this.cardView = cardView;
+                this.title = title;
+                this.subtitle = subtitle;
+            }
+
+            @Override
+            protected Bitmap doInBackground(String... params) {
+                final String url = mUrl;
+                // do stuff
+                Bitmap bitmap = getBitmapFromURL(url);
+                return bitmap;
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                // super.onPostExecute(bitmap);
+                createPaletteAsync(bitmap, cardView, title, subtitle);
+            }
+
+            public Bitmap getBitmapFromURL(String src) {
+                try {
+                    URL url = new URL(src);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    Bitmap myBitmap = BitmapFactory.decodeStream(input);
+                    return myBitmap;
+                } catch (IOException e) {
+                    // Log exception
+                    return null;
+                }
+            }
+        }
+
 
         @Override
         public int getItemCount() {
@@ -200,12 +313,14 @@ public class ArticleListActivity extends ActionBarActivity implements
         public DynamicHeightNetworkImageView thumbnailView;
         public TextView titleView;
         public TextView subtitleView;
+        public CardView cardView;
 
         public ViewHolder(View view) {
             super(view);
             thumbnailView = (DynamicHeightNetworkImageView) view.findViewById(R.id.thumbnail);
             titleView = (TextView) view.findViewById(R.id.article_title);
             subtitleView = (TextView) view.findViewById(R.id.article_subtitle);
+            cardView = (CardView) view.findViewById(R.id.cardView);
         }
     }
 }

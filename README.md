@@ -1,4 +1,4 @@
-= XYZ Reader Code
+# XYZ Reader Code
 
 Jonathan Imperato's XYZ Reader Code
 

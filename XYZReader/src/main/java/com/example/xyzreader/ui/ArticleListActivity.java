@@ -26,12 +26,14 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
 import com.example.xyzreader.data.UpdaterService;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -156,8 +158,14 @@ public class ArticleListActivity extends AppCompatActivity implements
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))));
+                    // Get the transition name from the string
+                    Intent intent = new Intent(Intent.ACTION_VIEW, ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition())));
+                    /*
+                    String transitionName = getString(R.string.transition_string);
+                    ImageView IMG = view.findViewById(R.id.thumbnail);
+                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(ArticleListActivity.this, IMG, transitionName);
+                    */
+                    startActivity(intent);
                 }
             });
             return vh;
@@ -177,66 +185,52 @@ public class ArticleListActivity extends AppCompatActivity implements
 
         public void createPaletteAsync(Bitmap bitmap, final CardView cardView, final TextView title, final TextView subtitle) {
             Palette p = Palette.from(bitmap).generate();
-            // Use generated instance
+            // Use generated palette
             Palette.Swatch vibrant = p.getVibrantSwatch();
             Palette.Swatch lightVibrant = p.getLightVibrantSwatch();
             Palette.Swatch darkVibrant = p.getDarkVibrantSwatch();
             Palette.Swatch dominantSwatch = p.getDominantSwatch();
             Palette.Swatch mutedSwatch = p.getMutedSwatch();
             Palette.Swatch darkMutedSwatch = p.getDarkMutedSwatch();
+            ObjectAnimator animation = null;
             if (vibrant != null) {
-                ObjectAnimator animation =  ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, vibrant.getRgb());
+                animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, vibrant.getRgb());
                 title.setTextColor(vibrant.getTitleTextColor());
                 subtitle.setTextColor(vibrant.getBodyTextColor());
-                animation.setEvaluator(new ArgbEvaluator());
-                animation.setDuration(1000);
-                animation.start();
             } else if (lightVibrant != null) {
-                ObjectAnimator animation =  ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, lightVibrant.getRgb());
+                animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, lightVibrant.getRgb());
                 title.setTextColor(lightVibrant.getTitleTextColor());
                 subtitle.setTextColor(lightVibrant.getBodyTextColor());
-                animation.setEvaluator(new ArgbEvaluator());
-                animation.setDuration(1000);
-                animation.start();
             } else if (darkVibrant != null) {
-                ObjectAnimator animation =  ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, darkVibrant.getRgb());
+                animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, darkVibrant.getRgb());
                 title.setTextColor(darkVibrant.getTitleTextColor());
                 subtitle.setTextColor(darkVibrant.getBodyTextColor());
-                animation.setEvaluator(new ArgbEvaluator());
-                animation.setDuration(1000);
-                animation.start();
             } else if (dominantSwatch != null) {
-                ObjectAnimator animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, dominantSwatch.getRgb());
+                animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, dominantSwatch.getRgb());
                 title.setTextColor(dominantSwatch.getTitleTextColor());
                 subtitle.setTextColor(dominantSwatch.getBodyTextColor());
-                animation.setEvaluator(new ArgbEvaluator());
-                animation.setDuration(1000);
-                animation.start();
             } else if (mutedSwatch != null) {
-                ObjectAnimator animation =ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, mutedSwatch.getRgb());
+                animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, mutedSwatch.getRgb());
                 title.setTextColor(mutedSwatch.getTitleTextColor());
                 subtitle.setTextColor(mutedSwatch.getBodyTextColor());
-                animation.setEvaluator(new ArgbEvaluator());
-                animation.setDuration(1000);
-                animation.start();
             } else if (darkMutedSwatch != null) {
-                ObjectAnimator animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, darkMutedSwatch.getRgb());
+                animation = ObjectAnimator.ofInt(cardView, "backgroundColor", Color.WHITE, darkMutedSwatch.getRgb());
                 title.setTextColor(darkMutedSwatch.getTitleTextColor());
-                animation.setEvaluator(new ArgbEvaluator());
                 subtitle.setTextColor(darkMutedSwatch.getBodyTextColor());
-                animation.setDuration(1000);
-                animation.start();
             }
 
+            animation.setEvaluator(new ArgbEvaluator());
+            animation.setDuration(1000);
+            animation.start();
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             mCursor.moveToPosition(position);
+
             holder.titleView.setText(mCursor.getString(ArticleLoader.Query.TITLE));
             Date publishedDate = parsePublishedDate();
             if (!publishedDate.before(START_OF_EPOCH.getTime())) {
-
                 holder.subtitleView.setText(Html.fromHtml(
                         DateUtils.getRelativeTimeSpanString(
                                 publishedDate.getTime(),
@@ -252,11 +246,11 @@ public class ArticleListActivity extends AppCompatActivity implements
             }
 
             String url = mCursor.getString(ArticleLoader.Query.THUMB_URL);
+
             LoadCard loadCard = new LoadCard(url, holder.cardView, holder.titleView, holder.subtitleView);
             loadCard.execute();
-            holder.thumbnailView.setImageUrl(url,
-                    ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
-            holder.thumbnailView.setAspectRatio(mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO));
+            Picasso.get().load(url).into(holder.thumbnailView);
+
 
         }
 
@@ -310,14 +304,14 @@ public class ArticleListActivity extends AppCompatActivity implements
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public DynamicHeightNetworkImageView thumbnailView;
+        public ImageView thumbnailView;
         public TextView titleView;
         public TextView subtitleView;
         public CardView cardView;
 
         public ViewHolder(View view) {
             super(view);
-            thumbnailView = (DynamicHeightNetworkImageView) view.findViewById(R.id.thumbnail);
+            thumbnailView = (ImageView) view.findViewById(R.id.thumbnail);
             titleView = (TextView) view.findViewById(R.id.article_title);
             subtitleView = (TextView) view.findViewById(R.id.article_subtitle);
             cardView = (CardView) view.findViewById(R.id.cardView);

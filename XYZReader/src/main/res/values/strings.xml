@@ -8,5 +8,7 @@
     <string name="action_share">Share</string>
 
     <string name="up">Up</string>
+    <string name="transition_string">transition_string</string>
+
 
 </resources>

@@ -4,6 +4,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp">
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="32dp"
+            android:layout_marginLeft="32dp"
+            android:layout_gravity="center_horizontal"
+            android:background="#fff"
+            android:elevation="2dp"
+            android:maxWidth="@dimen/detail_card_max_width"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/article_body"
+                style="?android:attr/textAppearanceMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingMultiplier="@fraction/detail_body_line_spacing_multiplier"
+                android:padding="16dp"
+                android:textColorLink="@color/theme_accent"
+                android:textSize="@dimen/detail_body_text_size" />
+
+        </android.support.v7.widget.CardView>
+    </android.support.v4.widget.NestedScrollView>
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
@@ -47,34 +77,6 @@
         </android.support.design.widget.SubtitleCollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/scrollview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <android.support.v7.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:background="#fff"
-            android:elevation="2dp"
-            android:maxWidth="@dimen/detail_card_max_width"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/article_body"
-                style="?android:attr/textAppearanceMedium"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:lineSpacingMultiplier="@fraction/detail_body_line_spacing_multiplier"
-                android:padding="16dp"
-                android:textColorLink="@color/theme_accent"
-                android:textSize="@dimen/detail_body_text_size" />
-
-        </android.support.v7.widget.CardView>
-    </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/share_fab"
@@ -84,6 +86,6 @@
         android:src="@drawable/ic_share"
         app:fabSize="normal"
         app:layout_anchor="@id/appbar"
-        app:layout_anchorGravity="bottom|right|end"/>
+        app:layout_anchorGravity="bottom|right|end" />
 
 </android.support.design.widget.CoordinatorLayout>

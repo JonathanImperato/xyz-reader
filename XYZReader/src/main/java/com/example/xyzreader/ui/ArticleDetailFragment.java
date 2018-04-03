@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -18,6 +19,7 @@ import android.text.Html;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -80,7 +82,6 @@ public class ArticleDetailFragment extends Fragment implements
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             mItemId = getArguments().getLong(ARG_ITEM_ID);
         }
-
         mIsCard = getResources().getBoolean(R.bool.detail_is_card);
         //    mStatusBarFullOpacityBottom = getResources().getDimensionPixelSize(R.dimen.detail_card_top_margin);
         setHasOptionsMenu(true);
@@ -138,16 +139,35 @@ public class ArticleDetailFragment extends Fragment implements
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void bindViews() {
         if (mRootView == null) {
             return;
         }
 
         TextView bodyView = (TextView) mRootView.findViewById(R.id.article_body);
+        bodyView.setVisibility(View.VISIBLE);
         final FloatingActionButton fab = (FloatingActionButton) mRootView.findViewById(R.id.share_fab);
+
 
         SubtitleCollapsingToolbarLayout collapsingToolbarLayout = (SubtitleCollapsingToolbarLayout) mRootView.findViewById(R.id.photo_container);
         bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(), "Rosario-Regular.ttf"));
+        Toolbar toolbar = (Toolbar) mRootView.findViewById(R.id.detail_toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                   getActivity().finish();
+            }
+        });
 
         if (mCursor != null) {
             mRootView.setVisibility(View.VISIBLE);
@@ -187,6 +207,7 @@ public class ArticleDetailFragment extends Fragment implements
                                     ((SubtitleCollapsingToolbarLayout) mRootView.findViewById(R.id.photo_container))
                                             .setContentScrimColor(mMutedColor);
                                 fab.setBackgroundColor(mMutedColor);
+                                fab.setBackgroundTintList(ColorStateList.valueOf(mMutedColor));
                             }
                         }
 

@@ -5,6 +5,7 @@ import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -160,21 +161,25 @@ public class ArticleDetailFragment extends Fragment implements
 
 
         SubtitleCollapsingToolbarLayout collapsingToolbarLayout = (SubtitleCollapsingToolbarLayout) mRootView.findViewById(R.id.photo_container);
+
         bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(), "Rosario-Regular.ttf"));
-        Toolbar toolbar = (Toolbar) mRootView.findViewById(R.id.detail_toolbar);
+        final Toolbar toolbar = (Toolbar) mRootView.findViewById(R.id.detail_toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                   getActivity().finish();
+                getActivity().finish();
             }
         });
 
         if (mCursor != null) {
             mRootView.setVisibility(View.VISIBLE);
-            collapsingToolbarLayout.setTitle(mCursor.getString(ArticleLoader.Query.TITLE));
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                toolbar.setTitle(mCursor.getString(ArticleLoader.Query.TITLE));
+            } else if (collapsingToolbarLayout != null)
+                collapsingToolbarLayout.setTitle(mCursor.getString(ArticleLoader.Query.TITLE));
             Date publishedDate = parsePublishedDate();
-            if (!publishedDate.before(START_OF_EPOCH.getTime())) {
-                collapsingToolbarLayout.setSubtitle(Html.fromHtml(
+            if (!publishedDate.before(START_OF_EPOCH.getTime())) { if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                toolbar.setSubtitle(Html.fromHtml(
                         DateUtils.getRelativeTimeSpanString(
                                 publishedDate.getTime(),
                                 System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
@@ -182,13 +187,29 @@ public class ArticleDetailFragment extends Fragment implements
                                 + " by <font color='#ffffff'>"
                                 + mCursor.getString(ArticleLoader.Query.AUTHOR)
                                 + "</font>"));
+            } else
+                if (collapsingToolbarLayout != null)
+                    collapsingToolbarLayout.setSubtitle(Html.fromHtml(
+                            DateUtils.getRelativeTimeSpanString(
+                                    publishedDate.getTime(),
+                                    System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
+                                    DateUtils.FORMAT_ABBREV_ALL).toString()
+                                    + " by <font color='#ffffff'>"
+                                    + mCursor.getString(ArticleLoader.Query.AUTHOR)
+                                    + "</font>"));
 
             } else {
                 // If date is before 1902, just show the string
-                collapsingToolbarLayout.setSubtitle(Html.fromHtml(
-                        outputFormat.format(publishedDate) + " by <font color='#ffffff'>"
-                                + mCursor.getString(ArticleLoader.Query.AUTHOR)
-                                + "</font>"));
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    toolbar.setSubtitle(Html.fromHtml(
+                            outputFormat.format(publishedDate) + " by <font color='#ffffff'>"
+                                    + mCursor.getString(ArticleLoader.Query.AUTHOR)
+                                    + "</font>"));
+                } else if (collapsingToolbarLayout != null)
+                    collapsingToolbarLayout.setSubtitle(Html.fromHtml(
+                            outputFormat.format(publishedDate) + " by <font color='#ffffff'>"
+                                    + mCursor.getString(ArticleLoader.Query.AUTHOR)
+                                    + "</font>"));
 
             }
 
@@ -206,6 +227,9 @@ public class ArticleDetailFragment extends Fragment implements
                                 if (mRootView.findViewById(R.id.photo_container) != null)
                                     ((SubtitleCollapsingToolbarLayout) mRootView.findViewById(R.id.photo_container))
                                             .setContentScrimColor(mMutedColor);
+                                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                                    toolbar.setBackgroundColor(mMutedColor);
+                                }
                                 fab.setBackgroundColor(mMutedColor);
                                 fab.setBackgroundTintList(ColorStateList.valueOf(mMutedColor));
                             }
@@ -218,8 +242,10 @@ public class ArticleDetailFragment extends Fragment implements
                     });
         } else {
             mRootView.setVisibility(View.GONE);
-            collapsingToolbarLayout.setTitle("N/A");
-            collapsingToolbarLayout.setSubtitle("N/A");
+            if (collapsingToolbarLayout != null) {
+                collapsingToolbarLayout.setTitle("N/A");
+                collapsingToolbarLayout.setSubtitle("N/A");
+            }
             bodyView.setText("N/A");
         }
     }

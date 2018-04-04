@@ -8,6 +8,8 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.SubtitleCollapsingToolbarLayout;
 import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
@@ -15,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.xyzreader.R;
 import com.example.xyzreader.data.ArticleLoader;
@@ -68,6 +71,7 @@ public class ArticleDetailActivity extends AppCompatActivity
                 //updateUpButtonPosition();
             }
         });
+
 
 /*        mUpButtonContainer = findViewById(R.id.up_container);
 

@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:background="#fff"
-            android:elevation="2dp"
+            android:elevation="4dp"
             android:maxWidth="@dimen/detail_card_max_width"
             android:orientation="vertical">
 

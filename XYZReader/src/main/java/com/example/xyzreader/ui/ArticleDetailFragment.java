@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.SubtitleCollapsingToolbarLayout;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
@@ -42,7 +43,7 @@ import java.util.GregorianCalendar;
  * tablets) or a {@link ArticleDetailActivity} on handsets.
  */
 public class ArticleDetailFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>{
     private static final String TAG = "ArticleDetailFragment";
 
     public static final String ARG_ITEM_ID = "item_id";
@@ -107,6 +108,7 @@ public class ArticleDetailFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_article_detail, container, false);
+
 
 
         mPhotoView = (ImageView) mRootView.findViewById(R.id.photo);
@@ -178,17 +180,17 @@ public class ArticleDetailFragment extends Fragment implements
             } else if (collapsingToolbarLayout != null)
                 collapsingToolbarLayout.setTitle(mCursor.getString(ArticleLoader.Query.TITLE));
             Date publishedDate = parsePublishedDate();
-            if (!publishedDate.before(START_OF_EPOCH.getTime())) { if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                toolbar.setSubtitle(Html.fromHtml(
-                        DateUtils.getRelativeTimeSpanString(
-                                publishedDate.getTime(),
-                                System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
-                                DateUtils.FORMAT_ABBREV_ALL).toString()
-                                + " by <font color='#ffffff'>"
-                                + mCursor.getString(ArticleLoader.Query.AUTHOR)
-                                + "</font>"));
-            } else
-                if (collapsingToolbarLayout != null)
+            if (!publishedDate.before(START_OF_EPOCH.getTime())) {
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    toolbar.setSubtitle(Html.fromHtml(
+                            DateUtils.getRelativeTimeSpanString(
+                                    publishedDate.getTime(),
+                                    System.currentTimeMillis(), DateUtils.HOUR_IN_MILLIS,
+                                    DateUtils.FORMAT_ABBREV_ALL).toString()
+                                    + " by <font color='#ffffff'>"
+                                    + mCursor.getString(ArticleLoader.Query.AUTHOR)
+                                    + "</font>"));
+                } else if (collapsingToolbarLayout != null)
                     collapsingToolbarLayout.setSubtitle(Html.fromHtml(
                             DateUtils.getRelativeTimeSpanString(
                                     publishedDate.getTime(),
@@ -217,21 +219,25 @@ public class ArticleDetailFragment extends Fragment implements
             ImageLoaderHelper.getInstance(getActivity()).getImageLoader()
                     .get(mCursor.getString(ArticleLoader.Query.PHOTO_URL), new ImageLoader.ImageListener() {
                         @Override
-                        public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
+                        public void onResponse(final ImageLoader.ImageContainer imageContainer, boolean b) {
                             Bitmap bitmap = imageContainer.getBitmap();
                             if (bitmap != null) {
-                                Palette p = Palette.generate(bitmap, 12);
-                                mMutedColor = p.getDarkMutedColor(0xFF333333);
-                                mPhotoView.setImageBitmap(imageContainer.getBitmap());
+                                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                                    public void onGenerated(Palette p) {
+                                        mMutedColor = p.getDarkMutedColor(0xFF333333);
+                                        mPhotoView.setImageBitmap(imageContainer.getBitmap());
 
-                                if (mRootView.findViewById(R.id.photo_container) != null)
-                                    ((SubtitleCollapsingToolbarLayout) mRootView.findViewById(R.id.photo_container))
-                                            .setContentScrimColor(mMutedColor);
-                                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                                    toolbar.setBackgroundColor(mMutedColor);
-                                }
-                                fab.setBackgroundColor(mMutedColor);
-                                fab.setBackgroundTintList(ColorStateList.valueOf(mMutedColor));
+                                        if (mRootView.findViewById(R.id.photo_container) != null)
+                                            ((SubtitleCollapsingToolbarLayout) mRootView.findViewById(R.id.photo_container))
+                                                    .setContentScrimColor(mMutedColor);
+                                        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                                            toolbar.setBackgroundColor(mMutedColor);
+                                        }
+                                        fab.setBackgroundColor(mMutedColor);
+                                        fab.setBackgroundTintList(ColorStateList.valueOf(mMutedColor));
+                                    }
+                                });
+
                             }
                         }
 
@@ -279,5 +285,6 @@ public class ArticleDetailFragment extends Fragment implements
         mCursor = null;
         bindViews();
     }
+
 
 }

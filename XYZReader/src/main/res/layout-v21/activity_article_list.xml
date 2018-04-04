@@ -8,12 +8,12 @@
         android:id="@+id/toolbar_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="8dp">
+        android:theme="@style/Theme.Bacon">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/detail_toolbar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            android:background="?colorAccent"
+            android:background="@color/theme_primary"
             android:layout_width="match_parent"
             app:layout_scrollFlags="scroll|enterAlways"
             android:layout_height="?actionBarSize" >
